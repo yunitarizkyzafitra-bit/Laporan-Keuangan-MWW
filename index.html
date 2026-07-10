@@ -2,91 +2,74 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Executive Dashboard MWW</title>
+    <title>Sistem Kas MWW</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --biru-mewah: #003366; --emas: #c5a059; }
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
-        .header-box { background: var(--biru-mewah); color: white; padding: 2rem; border-radius: 0 0 50px 50px; }
-        .card-mewah { border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 20px; }
-        .btn-mewah { background: var(--biru-mewah); color: white; border-radius: 10px; }
+        :root { --tosca: #008080; }
+        body { background-color: #f4f7f6; font-family: sans-serif; }
+        .navbar { background-color: var(--tosca); color: white; padding: 1rem; }
+        .card { border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: none; }
+        .btn-tosca { background-color: var(--tosca); color: white; }
     </style>
 </head>
 <body>
 
-<div class="header-box">
-    <div class="container d-flex align-items-center">
-        <img src="logo-mww.png" style="width:60px; height:60px;" class="me-3">
-        <div>
-            <h4 class="mb-0">Executive Dashboard Kas</h4>
-            <small>SISTEM INTEGRASI REAL-TIME | <i class="fas fa-circle text-success"></i> Terhubung</small>
-        </div>
+<!-- Halaman Login -->
+<div id="loginPage" class="container mt-5" style="max-width: 400px;">
+    <div class="card p-4 text-center">
+        <h4>MWW SULAWESI TENGAH</h4>
+        <input type="text" id="user" class="form-control mb-2" placeholder="Username">
+        <input type="password" id="pass" class="form-control mb-2" placeholder="Kata Sandi">
+        <button class="btn btn-tosca w-100" onclick="login()">MASUK SISTEM</button>
     </div>
 </div>
 
-<div class="container mt-4">
+<!-- Dashboard -->
+<div id="dashboardPage" class="container mt-4" style="display:none;">
+    <nav class="navbar mb-4 rounded"><h4>Dashboard Kas</h4><span id="userLog"></span></nav>
     <div class="row">
-        <div class="col-md-6 mb-3">
-            <div class="card card-mewah">
-                <h6>SALDO AWAL</h6>
-                <h3 class="text-primary">Rp 16.152.981</h3>
-            </div>
-        </div>
-        <div class="col-md-6 mb-3">
-            <div class="card card-mewah">
-                <h6>SALDO AKHIR</h6>
-                <h3 class="text-danger">Rp 15.711.218</h3>
-            </div>
-        </div>
+        <div class="col-md-6"><div class="card p-3 mb-3"><h6>Saldo Awal</h6><h4 id="saldoAwal">Rp 16.152.981</h4></div></div>
+        <div class="col-md-6"><div class="card p-3 mb-3"><h6>Saldo Akhir</h6><h4 id="saldoAkhir">Rp 15.711.218</h4></div></div>
     </div>
-
-    <!-- Input Form -->
-    <div class="card card-mewah mt-4">
-        <h5>Input Jurnal Baru</h5>
-        <div class="row">
-            <div class="col-md-3"><input type="text" id="uraian" class="form-control" placeholder="Uraian"></div>
-            <div class="col-md-3"><input type="text" id="kategori" class="form-control" placeholder="Kategori"></div>
-            <div class="col-md-3">
-                <select id="jenis" class="form-select">
-                    <option value="Masuk">Masuk</option>
-                    <option value="Keluar">Keluar</option>
-                </select>
-            </div>
-            <div class="col-md-3"><button class="btn btn-mewah w-100" onclick="simpanData()">Simpan</button></div>
-        </div>
-    </div>
-
-    <div class="card card-mewah mt-4">
+    
+    <div class="card p-4 mt-3">
         <h5>Riwayat Transaksi</h5>
-        <table class="table mt-3">
-            <thead><tr><th>Tanggal</th><th>Uraian</th><th>Kategori</th><th>Jenis</th></tr></thead>
+        <table class="table table-hover mt-3">
+            <thead style="background-color: var(--tosca); color: white;">
+                <tr><th>Tanggal</th><th>Jenis Arus Kas</th><th>Uang Keluar</th><th>Uang Masuk</th><th>Uraian</th></tr>
+            </thead>
             <tbody id="tabelBody"></tbody>
         </table>
     </div>
 </div>
 
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw-bL__jnkDz9_ts2ulOZ5bKBTW5nTsBWxNsMgUGxsnRYWRWlg-EcOc-pabhMpRGaUxxA/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwMr9h-Z2YZmynE0z4ReEoPLQsGiudESVNYXm-lYm1IoXi5vC45Ch2_3p0vseGjR0tbmg/exec"; // Ganti dengan URL deployment Anda
 
-    function simpanData() {
-        let data = {
-            tanggal: new Date().toLocaleDateString('id-ID'), // Hanya tanggal
-            uraian: document.getElementById('uraian').value,
-            kategori: document.getElementById('kategori').value,
-            jenis: document.getElementById('jenis').value
-        };
+    function login() {
+        let u = document.getElementById('user').value;
+        let p = document.getElementById('pass').value;
+        if ((u == 'Ketua' && p == 'Muslimah') || (u == 'Bendahara' && p == 'Wahdah')) {
+            localStorage.setItem("user", u);
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('dashboardPage').style.display = 'block';
+            document.getElementById('userLog').innerText = "Halo, " + u;
+            loadData();
+        } else { alert("Login Gagal!"); }
+    }
 
-        if (navigator.onLine) {
-            fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(data) });
-            alert("Data tersimpan!");
-        } else {
-            let offlineData = JSON.parse(localStorage.getItem('offline') || '[]');
-            offlineData.push(data);
-            localStorage.setItem('offline', JSON.stringify(offlineData));
-            alert("Mode Offline: Data tersimpan di perangkat.");
-        }
+    function loadData() {
+        fetch(WEB_APP_URL)
+            .then(response => response.json())
+            .then(data => {
+                let tbody = document.getElementById('tabelBody');
+                tbody.innerHTML = "";
+                data.forEach(row => {
+                    let tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${row[2]}</td><td>${row[3]}</td><td>${row[4]}</td><td>${row[5]}</td><td>${row[6]}</td>`;
+                    tbody.appendChild(tr);
+                });
+            });
     }
 </script>
 </body>
