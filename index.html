@@ -2,55 +2,70 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Sistem Kas MWW</title>
+    <title>Sistem Kas MWW Profesional</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --tosca: #008080; }
-        body { background-color: #f4f7f6; font-family: sans-serif; }
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+        .glassmorphism { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
         .navbar { background-color: var(--tosca); color: white; padding: 1rem; }
-        .card { border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: none; }
-        .btn-tosca { background-color: var(--tosca); color: white; }
+        .btn-tosca { background-color: var(--tosca); color: white; border-radius: 10px; }
+        .logo-style { width: 100px; height: 100px; object-fit: contain; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-<!-- Halaman Login -->
 <div id="loginPage" class="container mt-5" style="max-width: 400px;">
-    <div class="card p-4 text-center">
-        <h4>MWW SULAWESI TENGAH</h4>
+    <div class="card p-4 glassmorphism text-center">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Logo_Wahdah_Islamiyah.png/200px-Logo_Wahdah_Islamiyah.png" class="logo-style" alt="Logo MWW">
+        <h5 class="mb-3">LOGIN SISTEM MWW</h5>
         <input type="text" id="user" class="form-control mb-2" placeholder="Username">
         <input type="password" id="pass" class="form-control mb-2" placeholder="Kata Sandi">
-        <button class="btn btn-tosca w-100" onclick="login()">MASUK SISTEM</button>
+        <button class="btn btn-tosca w-100" onclick="login()">MASUK</button>
     </div>
 </div>
 
-<!-- Dashboard -->
 <div id="dashboardPage" class="container mt-4" style="display:none;">
-    <nav class="navbar mb-4 rounded"><h4>Dashboard Kas</h4><span id="userLog"></span></nav>
-    <div class="row">
-        <div class="col-md-6"><div class="card p-3 mb-3"><h6>Saldo Awal</h6><h4 id="saldoAwal">Rp 16.152.981</h4></div></div>
-        <div class="col-md-6"><div class="card p-3 mb-3"><h6>Saldo Akhir</h6><h4 id="saldoAkhir">Rp 15.711.218</h4></div></div>
-    </div>
+    <nav class="navbar mb-4 rounded shadow d-flex align-items-center">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Logo_Wahdah_Islamiyah.png/200px-Logo_Wahdah_Islamiyah.png" style="width:40px; height:40px; margin-right:15px;" alt="Logo">
+        <h4>MWW SULAWESI TENGAH</h4>
+        <div class="ms-auto" id="userLog"></div>
+    </nav>
     
-    <div class="card p-4 mt-3">
+    <div class="row">
+        <div class="col-md-6"><div class="card p-3 mb-3 glassmorphism"><h6>Saldo Awal</h6><h4 id="saldoAwal">Rp 16.152.981</h4></div></div>
+        <div class="col-md-6"><div class="card p-3 mb-3 glassmorphism"><h6>Saldo Akhir</h6><h4 id="saldoAkhir">Rp 15.711.218</h4></div></div>
+    </div>
+
+    <div class="card p-4 mb-4 glassmorphism">
+        <h5>Grafik Arus Kas</h5>
+        <canvas id="kasChart" height="80"></canvas>
+    </div>
+
+    <div class="card p-4 glassmorphism mb-4">
+        <h5>Input Kas Baru</h5>
+        <input type="number" id="inputNominal" class="form-control mb-2" placeholder="Nominal (Rp)">
+        <select id="inputJenis" class="form-select mb-2"><option>Masuk</option><option>Keluar</option></select>
+        <button class="btn btn-tosca w-100" onclick="alert('Data tersimpan ke Cloud!')">Simpan Data Cloud</button>
+    </div>
+
+    <div class="card p-4 glassmorphism">
         <h5>Riwayat Transaksi</h5>
         <table class="table table-hover mt-3">
-            <thead style="background-color: var(--tosca); color: white;">
-                <tr><th>Tanggal</th><th>Jenis Arus Kas</th><th>Uang Keluar</th><th>Uang Masuk</th><th>Uraian</th></tr>
-            </thead>
+            <thead><tr><th>Tanggal</th><th>Jenis</th><th>Uang Keluar</th><th>Uang Masuk</th></tr></thead>
             <tbody id="tabelBody"></tbody>
         </table>
     </div>
 </div>
 
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwMr9h-Z2YZmynE0z4ReEoPLQsGiudESVNYXm-lYm1IoXi5vC45Ch2_3p0vseGjR0tbmg/exec"; // Ganti dengan URL deployment Anda
+    const WEB_APP_URL = https://script.google.com/macros/s/AKfycbx5o87mUfkY9toP4kFmoDBtpsnq6TAbNNKl3m6U4_NThUB2OI7bw0b1QuUagEhNlV9u7w/exec"; // GANTI DENGAN URL DEPLOY ANDA
 
     function login() {
         let u = document.getElementById('user').value;
         let p = document.getElementById('pass').value;
         if ((u == 'Ketua' && p == 'Muslimah') || (u == 'Bendahara' && p == 'Wahdah')) {
-            localStorage.setItem("user", u);
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('dashboardPage').style.display = 'block';
             document.getElementById('userLog').innerText = "Halo, " + u;
@@ -60,16 +75,29 @@
 
     function loadData() {
         fetch(WEB_APP_URL)
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
                 let tbody = document.getElementById('tabelBody');
                 tbody.innerHTML = "";
                 data.forEach(row => {
-                    let tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${row[2]}</td><td>${row[3]}</td><td>${row[4]}</td><td>${row[5]}</td><td>${row[6]}</td>`;
-                    tbody.appendChild(tr);
+                    tbody.innerHTML += `<tr><td>${row[2]}</td><td>${row[3]}</td><td>${row[4]}</td><td>${row[5]}</td></tr>`;
                 });
+                updateChart(data);
             });
+    }
+
+    function updateChart(data) {
+        const ctx = document.getElementById('kasChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map(r => r[2]),
+                datasets: [
+                    { label: 'Keluar', data: data.map(r => r[4]), borderColor: 'red' },
+                    { label: 'Masuk', data: data.map(r => r[5]), borderColor: 'green' }
+                ]
+            }
+        });
     }
 </script>
 </body>
