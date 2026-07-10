@@ -2,109 +2,92 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Sistem Kas MWW Profesional</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Executive Dashboard MWW</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --tosca: #008080; }
-        body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
-        .glassmorphism { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
-        .navbar { background-color: var(--tosca); color: white; padding: 1rem; }
-        .btn-tosca { background-color: var(--tosca); color: white; border-radius: 10px; }
-        .logo-style { width: 100px; height: 100px; object-fit: contain; margin-bottom: 20px; }
+        :root { --biru-mewah: #003366; --emas: #c5a059; }
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+        .header-box { background: var(--biru-mewah); color: white; padding: 2rem; border-radius: 0 0 50px 50px; }
+        .card-mewah { border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 20px; }
+        .btn-mewah { background: var(--biru-mewah); color: white; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-<div id="loginPage" class="container mt-5" style="max-width: 400px;">
-    <div class="card p-4 glassmorphism text-center">
-        <img src="logo-mww.png" class="logo-style" alt="Logo MWW">
-        <h5 class="mb-3">LOGIN SISTEM MWW</h5>
-        <input type="text" id="user" class="form-control mb-2" placeholder="Username">
-        <div class="input-group mb-2">
-            <input type="password" id="pass" class="form-control" placeholder="Kata Sandi">
-            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()"><i class="fas fa-eye" id="toggleIcon"></i></button>
+<div class="header-box">
+    <div class="container d-flex align-items-center">
+        <img src="logo-mww.png" style="width:60px; height:60px;" class="me-3">
+        <div>
+            <h4 class="mb-0">Executive Dashboard Kas</h4>
+            <small>SISTEM INTEGRASI REAL-TIME | <i class="fas fa-circle text-success"></i> Terhubung</small>
         </div>
-        <button class="btn btn-tosca w-100" onclick="login()">MASUK</button>
     </div>
 </div>
 
-<div id="dashboardPage" class="container mt-4" style="display:none;">
-    <nav class="navbar mb-4 rounded shadow d-flex align-items-center">
-        <img src="logo-mww.png" style="width:40px; height:40px; margin-right:15px;" alt="Logo">
-        <h4>MWW SULAWESI TENGAH</h4>
-        <div class="ms-auto" id="userLog"></div>
-    </nav>
-    
-    <div class="card p-4 mb-4 glassmorphism">
-        <h5>Grafik Arus Kas</h5>
-        <canvas id="kasChart" height="80"></canvas>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <div class="card card-mewah">
+                <h6>SALDO AWAL</h6>
+                <h3 class="text-primary">Rp 16.152.981</h3>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card card-mewah">
+                <h6>SALDO AKHIR</h6>
+                <h3 class="text-danger">Rp 15.711.218</h3>
+            </div>
+        </div>
     </div>
 
-    <div class="card p-4 glassmorphism mb-4">
-        <h5>Input Kas Baru</h5>
-        <input type="number" id="inputNominal" class="form-control mb-2" placeholder="Nominal (Rp)">
-        <select id="inputJenis" class="form-select mb-2"><option value="Masuk">Masuk</option><option value="Keluar">Keluar</option></select>
-        <button class="btn btn-tosca w-100" onclick="simpanData()">Simpan Data Cloud</button>
+    <!-- Input Form -->
+    <div class="card card-mewah mt-4">
+        <h5>Input Jurnal Baru</h5>
+        <div class="row">
+            <div class="col-md-3"><input type="text" id="uraian" class="form-control" placeholder="Uraian"></div>
+            <div class="col-md-3"><input type="text" id="kategori" class="form-control" placeholder="Kategori"></div>
+            <div class="col-md-3">
+                <select id="jenis" class="form-select">
+                    <option value="Masuk">Masuk</option>
+                    <option value="Keluar">Keluar</option>
+                </select>
+            </div>
+            <div class="col-md-3"><button class="btn btn-mewah w-100" onclick="simpanData()">Simpan</button></div>
+        </div>
     </div>
 
-    <div class="card p-4 glassmorphism">
+    <div class="card card-mewah mt-4">
         <h5>Riwayat Transaksi</h5>
-        <table class="table table-hover mt-3">
-            <thead><tr><th>Tanggal</th><th>Jenis</th><th>Uang Keluar</th><th>Uang Masuk</th></tr></thead>
+        <table class="table mt-3">
+            <thead><tr><th>Tanggal</th><th>Uraian</th><th>Kategori</th><th>Jenis</th></tr></thead>
             <tbody id="tabelBody"></tbody>
         </table>
     </div>
 </div>
 
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw8dN99DQbEJY2PsEZ9T1rFYC_yFb8px-JR7xXAymw9Ou718lpJHa0ov7KQRCApUqqS8A/exec"; // GANTI DENGAN URL DEPLOY ANDA
+    const WEB_APP_URL = "URL_WEB_APP_ANDA";
 
-    function togglePassword() {
-        let p = document.getElementById('pass');
-        let icon = document.getElementById('toggleIcon');
-        if (p.type === "password") { p.type = "text"; icon.classList.replace('fa-eye', 'fa-eye-slash'); }
-        else { p.type = "password"; icon.classList.replace('fa-eye-slash', 'fa-eye'); }
+    function simpanData() {
+        let data = {
+            tanggal: new Date().toLocaleDateString('id-ID'), // Hanya tanggal
+            uraian: document.getElementById('uraian').value,
+            kategori: document.getElementById('kategori').value,
+            jenis: document.getElementById('jenis').value
+        };
+
+        if (navigator.onLine) {
+            fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(data) });
+            alert("Data tersimpan!");
+        } else {
+            let offlineData = JSON.parse(localStorage.getItem('offline') || '[]');
+            offlineData.push(data);
+            localStorage.setItem('offline', JSON.stringify(offlineData));
+            alert("Mode Offline: Data tersimpan di perangkat.");
+        }
     }
-
-    function login() {
-        let u = document.getElementById('user').value;
-        let p = document.getElementById('pass').value;
-        if ((u == 'Ketua' && p == 'Muslimah') || (u == 'Bendahara' && p == 'Wahdah')) {
-            document.getElementById('loginPage').style.display = 'none';
-            document.getElementById('dashboardPage').style.display = 'block';
-            document.getElementById('userLog').innerText = "Halo, " + u;
-            loadData();
-        } else { alert("Login Gagal!"); }
-    }
-
-    function loadData() {
-        fetch(WEB_APP_URL).then(res => res.json()).then(data => {
-            let tbody = document.getElementById('tabelBody');
-            tbody.innerHTML = "";
-            data.forEach(row => {
-                tbody.innerHTML += `<tr><td>${row[2]}</td><td>${row[3]}</td><td>${row[4]}</td><td>${row[5]}</td></tr>`;
-            });
-            updateChart(data);
-        });
-    }
-
-    function updateChart(data) {
-        const ctx = document.getElementById('kasChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: data.map(r => r[2]),
-                datasets: [
-                    { label: 'Keluar', data: data.map(r => r[4]), borderColor: 'red' },
-                    { label: 'Masuk', data: data.map(r => r[5]), borderColor: 'green' }
-                ]
-            }
-        });
-    }
-
-    function simpanData() { alert("Data tersimpan ke Cloud!"); }
 </script>
 </body>
 </html>
